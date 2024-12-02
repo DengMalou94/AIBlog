@@ -1,12 +1,55 @@
 "use client";
+import React, { useState, useEffect } from 'react'; // Combine React with hooks
+import Link from "next/link"; // Import Link from Next.js
+import { createClient } from '@supabase/supabase-js'; // Supabase client
+import type { User } from '@supabase/supabase-js'; // User type
 
-import Link from "next/link";
+const Header: React.FC = () => {
+  const [user, setUser] = useState<User | null>(null);
+  const [admin, setAdmin] = useState<User | null>(null);
 
-export default function Header(){
-    return(
+  useEffect(() => {
+    async function getUser() {
+      const supabase = createClient(
+        'https://xiumlvdpnajuozyzgimx.supabase.co', // Replace with your Supabase URL
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhpdW1sdmRwbmFqdW96eXpnaW14Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzI1MjA5MzQsImV4cCI6MjA0ODA5NjkzNH0.agO_NYph82eE9BM61v-cTvmqj3-6O7dj1fqlCQDdP5E' // Replace with your Supabase anon key
+      );
+
+      const { data, error } = await supabase.auth.getUser();
+
+      if (error || !data?.user) {
+        console.log('No User');
+      } else {
+        setUser(data.user);
+      }
+
+      const userEmail = 'email@example.com'; // Replace with admin email
+
+      if (!data?.user || data.user?.email !== userEmail) {
+        console.log('No Admin');
+      } else {
+        setAdmin(data.user);
+      }
+    }
+
+    getUser();
+  }, []);
+
+  return (
+    <header>
+      {user ? <p>User: {user.email}</p> : <p>No User Logged In</p>}
+      {admin ? <p>Admin: {admin.email}</p> : <p>No Admin Logged In</p>}
+    </header>
+  );
+};
+
+export default Header;
+
+  
         <>
         <header className="flex flex-wrap sm:justify-start sm:flex-nowrap z-50 w-full bg-gray-800 border-b
 border-gray-200 text-sm py-3 sm:py-0 ">
+    
     <nav
     className="relative max-w-7xl w-full mx-auto px-4 sm:flex sm:items-center sm:justify-between sm:px- 6 lg:px-8"
 aria-label="Global">
@@ -35,7 +78,10 @@ aria-label="Brand">
         </div>
     </div>
     </nav>
+
+
         </header>
         </>
-    );
-}
+
+
+
